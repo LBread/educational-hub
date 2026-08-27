@@ -1,0 +1,1118 @@
+/* =========================
+   FONTS
+
+   Lora (serif) carries headings for a more academic, institutional
+   feel. Inter carries body copy and UI for clean readability.
+   JetBrains Mono is kept only for code/folder-structure blocks.
+========================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* =========================
+   GENERAL / COLOR SYSTEM
+
+   School colors first: navy/blue as the professional base, orange
+   as the energetic accent reserved for calls-to-action and highlights.
+========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    /* Navy / blue -- primary identity */
+    --navy-900: #0d2543;
+    --navy-800: #123761;
+    --blue-700: #1d5fa6;
+    --blue-600: #2568b0;
+    --blue-500: #3c82cc;
+    --blue-100: #e6f0fa;
+
+    /* Orange -- accent / calls to action */
+    --orange-700: #c9540f;
+    --orange-600: #e8631e;
+    --orange-500: #f0812e;
+    --orange-100: #fdecdd;
+
+    /* Neutrals */
+    --bg: #eef3f9;
+    --surface: #ffffff;
+    --border: #e1e7ef;
+    --border-strong: #cdd8e6;
+    --text: #142238;
+    --text-dim: #5b6b82;
+    --text-on-dark: #eef4fb;
+    --text-on-dark-dim: #a9bfd9;
+
+    --shadow-sm: 0 1px 2px rgba(13, 37, 67, 0.06), 0 1px 1px rgba(13, 37, 67, 0.04);
+    --shadow-md: 0 8px 20px rgba(13, 37, 67, 0.08), 0 2px 6px rgba(13, 37, 67, 0.06);
+    --shadow-lg: 0 20px 44px rgba(13, 37, 67, 0.14);
+
+    /* ---- Glass surface system ----
+       Light glass = frosted white panels (cards, footer well, code blocks).
+       Dark glass   = frosted navy panels (topbar, hero, footer, viewer bar).
+       Every glass surface pairs a translucent fill with a soft inset
+       highlight along its top edge, mimicking light catching a curved
+       glass rim, plus an ambient shadow for depth underneath. */
+    --glass-blur: 22px;
+
+    --glass-light-bg: rgba(255, 255, 255, 0.58);
+    --glass-light-bg-strong: rgba(255, 255, 255, 0.74);
+    --glass-light-border: rgba(255, 255, 255, 0.7);
+    --glass-light-highlight: rgba(255, 255, 255, 0.55);
+    --glass-light-shadow: 0 10px 34px rgba(13, 37, 67, 0.12);
+    --glass-light-shadow-hover: 0 18px 44px rgba(13, 37, 67, 0.18);
+
+    --glass-dark-bg: rgba(13, 37, 67, 0.62);
+    --glass-dark-border: rgba(255, 255, 255, 0.14);
+    --glass-dark-highlight: rgba(255, 255, 255, 0.22);
+    --glass-dark-shadow: 0 12px 36px rgba(6, 16, 30, 0.28);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    position: relative;
+
+    font-family: 'Inter', Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+
+    color: var(--text);
+    background: var(--bg);
+
+    overflow-x: hidden;
+}
+
+/* =========================
+   AMBIENT BACKGROUND GLOW
+   Soft, fixed, blurred color underneath everything. This is what the
+   frosted glass surfaces (topbar, hero, cards, footer) actually pick
+   up through backdrop-filter -- without color behind them, glass
+   panels just look like plain gray boxes.
+========================= */
+
+.bg-glow {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bg-glow__blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.5;
+}
+
+.bg-glow__blob--1 {
+    width: 560px;
+    height: 560px;
+    top: -160px;
+    left: -120px;
+    background: radial-gradient(circle, var(--blue-500), transparent 70%);
+    animation: glowDrift1 50s ease-in-out infinite alternate;
+}
+
+.bg-glow__blob--2 {
+    width: 480px;
+    height: 480px;
+    top: 34%;
+    right: -160px;
+    background: radial-gradient(circle, var(--orange-500), transparent 70%);
+    animation: glowDrift2 60s ease-in-out infinite alternate;
+}
+
+.bg-glow__blob--3 {
+    width: 520px;
+    height: 520px;
+    bottom: -200px;
+    left: 22%;
+    background: radial-gradient(circle, var(--navy-800), transparent 70%);
+    opacity: 0.35;
+    animation: glowDrift3 70s ease-in-out infinite alternate;
+}
+
+@keyframes glowDrift1 {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(70px, 50px); }
+}
+@keyframes glowDrift2 {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(-60px, 70px); }
+}
+@keyframes glowDrift3 {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(50px, -60px); }
+}
+
+h1, h2, h3 {
+    font-family: 'Lora', Georgia, serif;
+}
+
+/* Thin school-color bar fixed to the very top of the viewport --
+   a simple, classic branding touch that now sits above the glass. */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    z-index: 60;
+    background: linear-gradient(90deg, var(--orange-600), var(--blue-600));
+    pointer-events: none;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 10px;
+    border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--blue-500);
+}
+
+::selection {
+    background: var(--orange-100);
+    color: var(--navy-900);
+}
+
+:focus-visible {
+    outline: 2px solid var(--blue-600);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+
+/* =========================
+   TOP BAR
+========================= */
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 18px 40px;
+    margin-top: 3px; /* clears the fixed color bar */
+
+    background: var(--glass-dark-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    border-bottom: 1px solid var(--glass-dark-border);
+    box-shadow:
+        inset 0 1px 0 var(--glass-dark-highlight),
+        var(--glass-dark-shadow);
+
+    position: sticky;
+    top: 3px;
+    z-index: 50;
+}
+
+.topbar > div,
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Small circular monogram badge standing in for a school/hub crest */
+.topbar > div::before,
+.app-brand::before {
+    content: '\1F393';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    width: 42px;
+    height: 42px;
+
+    font-size: 20px;
+
+    background: linear-gradient(160deg, var(--orange-500), var(--orange-700));
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.45),
+        var(--shadow-sm);
+}
+
+.topbar h1 {
+    margin: 0;
+
+    color: var(--text-on-dark);
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.subtitle {
+    margin: 2px 0 0;
+    color: var(--text-on-dark-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.nav-button {
+    display: inline-block;
+
+    padding: 10px 22px;
+
+    color: var(--text-on-dark);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(238, 244, 251, 0.32);
+
+    text-decoration: none;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14.5px;
+
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-button:hover {
+    background: rgba(238, 244, 251, 0.16);
+    border-color: var(--orange-500);
+    transform: translateY(-1px);
+}
+
+.nav-button:active {
+    background: rgba(238, 244, 251, 0.22);
+    transform: translateY(0);
+}
+
+
+/* =========================
+   PRIMARY ACTION BUTTONS
+   Translucent orange glass pills, shared by every "open/launch" style
+   button across the site. A soft inner highlight along the top edge
+   stands in for light catching a curved glass rim.
+========================= */
+
+.app-button,
+.home-button,
+.fullscreen-button,
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 11px 24px;
+
+    color: #ffffff;
+    background: linear-gradient(135deg, rgba(240, 129, 46, 0.92), rgba(201, 84, 15, 0.92));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+
+    text-decoration: none;
+    border-radius: 999px;
+
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 8px 22px rgba(201, 84, 15, 0.28);
+    transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.app-button:hover,
+.home-button:hover,
+.fullscreen-button:hover,
+.back-button:hover {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 14px 32px rgba(201, 84, 15, 0.36);
+}
+
+.app-button:active,
+.home-button:active,
+.fullscreen-button:active,
+.back-button:active {
+    transform: translateY(0);
+    filter: brightness(0.96);
+}
+
+.fullscreen-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+main {
+    width: min(1100px, 90%);
+    margin: 0 auto 60px;
+}
+
+/* =========================
+   HERO BANNER
+   A rounded, floating glass panel rather than a full-bleed hard-edged
+   block -- it sits inset within the content column so its rounded
+   corners and blurred edges read as glass, not a corporate banner.
+========================= */
+
+.hero {
+    position: relative;
+    overflow: hidden;
+
+    width: 100%;
+    margin: 0 0 48px;
+    padding: 56px clamp(24px, 6vw, 64px);
+
+    border-radius: 32px;
+    background: var(--glass-dark-bg);
+    backdrop-filter: blur(30px) saturate(160%);
+    -webkit-backdrop-filter: blur(30px) saturate(160%);
+    border: 1px solid var(--glass-dark-border);
+    box-shadow:
+        inset 0 1px 0 var(--glass-dark-highlight),
+        var(--glass-dark-shadow);
+}
+
+/* Diagonal light sheen, like a reflection sweeping across curved glass */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -20%;
+    width: 70%;
+    height: 220%;
+    background: linear-gradient(115deg, rgba(255, 255, 255, 0.16), transparent 45%);
+    transform: rotate(-12deg);
+    pointer-events: none;
+}
+
+/* One soft color bloom for warmth, tucked in the far corner */
+.hero::after {
+    content: '';
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    bottom: -160px;
+    right: -80px;
+    border-radius: 50%;
+    filter: blur(70px);
+    background: radial-gradient(circle, rgba(232, 99, 30, 0.4), transparent 70%);
+    pointer-events: none;
+    animation: driftSoft 46s ease-in-out infinite alternate;
+}
+
+@keyframes driftSoft {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(-4%, 4%) scale(1.08); }
+}
+
+.hero h2,
+.hero p {
+    position: relative;
+    max-width: 620px;
+}
+
+.hero h2 {
+    margin: 0 0 10px;
+
+    color: var(--text-on-dark);
+    font-size: 34px;
+    font-weight: 700;
+}
+
+.hero p {
+    margin: 0;
+    color: var(--text-on-dark-dim);
+    font-size: 16px;
+}
+
+
+/* =========================
+   APP GRID
+========================= */
+
+.app-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(260px, 320px));
+
+    gap: 20px;
+}
+
+
+/* =========================
+   CATEGORIES
+   Styled like a course catalog: a colored subject tab rather than a
+   fading rule line.
+========================= */
+
+.category-section {
+    margin-bottom: 40px;
+}
+
+.category-title {
+    display: flex;
+    align-items: center;
+    margin: 0 0 18px;
+
+    color: var(--navy-900);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.category-title::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: var(--orange-600);
+    box-shadow: 0 0 0 4px rgba(232, 99, 30, 0.16);
+}
+
+.category-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    margin-left: 16px;
+    background: var(--border-strong);
+}
+
+
+/* =========================
+   FAVORITE SPOTLIGHT
+   Rendered as a wide "pinned resource" banner rather than a large
+   centered glowing card, so it reads like a dashboard quick-access
+   strip instead of a hero game tile.
+========================= */
+
+.favorite-section {
+    display: flex;
+    margin-bottom: 40px;
+}
+
+.app-card.featured {
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 6px;
+    column-gap: 24px;
+
+    padding: 26px 30px;
+
+    background: var(--glass-light-bg-strong);
+    border: 1px solid var(--glass-light-border);
+    border-radius: 20px;
+    box-shadow:
+        inset 4px 0 0 rgba(232, 99, 30, 0.55),
+        inset 0 1px 0 var(--glass-light-highlight),
+        var(--glass-light-shadow);
+}
+
+.app-card.featured .app-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0;
+    font-size: 28px;
+}
+
+.app-card.featured .app-info {
+    flex: 1;
+}
+
+.app-card.featured .app-info h3 {
+    font-size: 20px;
+}
+
+.app-card.featured .app-info p {
+    margin-bottom: 0;
+}
+
+.app-card.featured .app-button {
+    margin-top: 14px;
+}
+
+.featured-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: var(--orange-700);
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.app-card.featured .featured-badge {
+    flex: 1 0 100%;
+    order: -1;
+}
+
+
+/* =========================
+   FAVORITE TOGGLE (star)
+========================= */
+
+.app-card .fav-toggle {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+
+    color: var(--text-dim);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+}
+
+.app-card .fav-toggle:hover {
+    transform: scale(1.08);
+    color: var(--orange-600);
+    border-color: var(--orange-500);
+}
+
+.app-card .fav-toggle.is-fav {
+    color: var(--orange-600);
+    border-color: var(--orange-500);
+    background: var(--orange-100);
+}
+
+.app-card.featured .fav-toggle {
+    position: static;
+    align-self: flex-start;
+    margin-left: auto;
+}
+
+
+/* =========================
+   APP CARD
+   Frosted glass resource tiles: translucent fill, blurred backdrop,
+   a soft sheen along the top, and a gentle lift on hover.
+========================= */
+
+.app-card {
+    display: flex;
+    flex-direction: column;
+
+    min-height: 240px;
+
+    padding: 24px;
+
+    background: var(--glass-light-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    border: 1px solid var(--glass-light-border);
+    border-radius: 20px;
+
+    position: relative;
+    overflow: hidden;
+
+    box-shadow:
+        inset 0 1px 0 var(--glass-light-highlight),
+        var(--glass-light-shadow);
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+/* Soft diagonal sheen across the top of the card, like light on glass */
+.app-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.4), transparent 42%);
+    pointer-events: none;
+}
+
+/* Cursor-following highlight -- light refracting across the glass as
+   the pointer moves. --mx/--my are set by the page's mousemove
+   listener; they default to center so the card looks fine before
+   the first pointer move. */
+.app-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.4), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.app-card:hover::after {
+    opacity: 1;
+}
+
+/* Keep real content above the sheen/glow layers */
+.app-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.app-card:hover {
+    border-color: rgba(60, 130, 204, 0.55);
+    transform: translateY(-4px);
+    box-shadow:
+        inset 0 1px 0 var(--glass-light-highlight),
+        var(--glass-light-shadow-hover);
+}
+
+
+/* =========================
+   APP ICON
+========================= */
+
+.app-icon {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 56px;
+    height: 56px;
+
+    margin-bottom: 16px;
+
+    font-size: 26px;
+
+    background: linear-gradient(160deg, rgba(60, 130, 204, 0.32), rgba(60, 130, 204, 0.1));
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+    transition: transform 0.2s ease;
+}
+
+.app-card:hover .app-icon {
+    transform: scale(1.05);
+}
+
+
+/* =========================
+   APP INFORMATION
+========================= */
+
+.app-info {
+    display: flex;
+    flex-direction: column;
+
+    flex: 1;
+    position: relative;
+}
+
+.app-info h3 {
+    margin: 0 0 8px;
+
+    color: var(--navy-900);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.app-info p {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: var(--text-dim);
+    font-size: 14.5px;
+}
+
+
+/* =========================
+   APP BUTTON
+========================= */
+
+.app-button {
+    width: fit-content;
+    margin-top: auto;
+}
+
+.app-button::after {
+    content: '\2192';
+    transition: transform 0.18s ease;
+}
+
+.app-button:hover::after {
+    transform: translateX(3px);
+}
+
+
+/* =========================
+   ABOUT PAGE
+========================= */
+
+.about-card {
+    max-width: 800px;
+
+    margin: 0 auto;
+    padding: 38px;
+
+    background: var(--glass-light-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    border: 1px solid var(--glass-light-border);
+    border-radius: 24px;
+    box-shadow:
+        inset 0 1px 0 var(--glass-light-highlight),
+        var(--glass-light-shadow);
+}
+
+.about-card h2 {
+    margin-top: 0;
+    color: var(--navy-900);
+    font-weight: 700;
+}
+
+.about-card h3 {
+    color: var(--navy-900);
+    margin-top: 30px;
+    position: relative;
+    padding-left: 14px;
+}
+
+.about-card h3::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--orange-600);
+}
+
+.about-card p {
+    color: var(--text-dim);
+}
+
+
+/* =========================
+   CODE / FOLDER STRUCTURE
+========================= */
+
+pre {
+    overflow-x: auto;
+
+    padding: 18px 20px;
+
+    color: var(--text);
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    border: 1px solid var(--glass-light-border);
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+code {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 13.5px;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    padding: 28px;
+    margin-top: 20px;
+
+    text-align: center;
+
+    background: var(--glass-dark-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    color: var(--text-on-dark-dim);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    border-top: 1px solid var(--glass-dark-border);
+    box-shadow: inset 0 1px 0 var(--glass-dark-highlight);
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    :root {
+        --glass-blur: 14px;
+    }
+
+    .topbar {
+        padding: 14px 20px;
+    }
+
+    .topbar > div::before {
+        width: 36px;
+        height: 36px;
+        font-size: 17px;
+    }
+
+    .topbar h1 {
+        font-size: 20px;
+    }
+
+    .nav-button {
+        padding: 8px 14px;
+    }
+
+    main {
+        width: 92%;
+    }
+
+    .hero {
+        padding: 40px 24px;
+        border-radius: 24px;
+    }
+
+    .hero h2 {
+        font-size: 26px;
+    }
+
+    .app-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .category-title {
+        font-size: 16px;
+    }
+
+    .app-card.featured {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .app-card.featured .fav-toggle {
+        position: absolute;
+        margin-left: 0;
+    }
+
+    .about-card {
+        padding: 25px;
+    }
+}
+
+
+/* =========================
+   APP VIEWER
+   Legacy embedded-app/iframe viewer shell, restyled to match the
+   new light/navy/orange system in case a future app uses it.
+========================= */
+
+.app-viewer-page {
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+.app-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 16px 30px;
+    margin-top: 3px;
+
+    background: var(--glass-dark-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    border-bottom: 1px solid var(--glass-dark-border);
+    box-shadow: inset 0 1px 0 var(--glass-dark-highlight);
+    position: sticky;
+    top: 3px;
+    z-index: 50;
+}
+
+.app-topbar h1 {
+    margin: 0;
+    color: var(--text-on-dark);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.app-container {
+    width: min(1200px, 94%);
+    margin: 30px auto;
+}
+
+.app-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.app-title h2 {
+    margin: 0;
+    color: var(--navy-900);
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.app-title p {
+    margin-top: 5px;
+    color: var(--text-dim);
+}
+
+
+/* Actual app viewer box */
+
+.app-box {
+    width: 100%;
+    height: 70vh;
+    min-height: 450px;
+
+    overflow: hidden;
+
+    background-color: var(--glass-light-bg-strong);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+
+    border: 1px solid var(--glass-light-border);
+    border-radius: 20px;
+    box-shadow:
+        inset 0 1px 0 var(--glass-light-highlight),
+        var(--glass-light-shadow);
+
+    position: relative;
+}
+
+.app-box iframe {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    border: none;
+
+    background-color: var(--surface);
+}
+
+/* Native fullscreen: let the box fill the screen completely */
+.app-box:fullscreen {
+    border-radius: 0;
+    border: none;
+    width: 100vw;
+    height: 100vh;
+}
+
+.app-box:-webkit-full-screen {
+    border-radius: 0;
+    border: none;
+    width: 100vw;
+    height: 100vh;
+}
+
+
+/* Back button below app viewer */
+
+.app-controls {
+    display: flex;
+    justify-content: center;
+
+    margin-top: 20px;
+}
+
+
+/* Mobile app layout */
+
+@media (max-width: 600px) {
+
+    .app-topbar {
+        padding: 14px 18px;
+    }
+
+    .app-topbar h1 {
+        font-size: 18px;
+    }
+
+    .app-container {
+        width: 96%;
+        margin: 20px auto;
+    }
+
+    .app-box {
+        height: 65vh;
+        min-height: 350px;
+    }
+
+    .app-title {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+
+/* =========================
+   MOTION SAFETY
+   Respect users who've asked for reduced motion at the OS level --
+   keep all the color/shape upgrades, drop the ambient animation.
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .hero::before,
+    .hero::after,
+    .bg-glow__blob {
+        animation: none !important;
+    }
+    * {
+        transition-duration: 0.01ms !important;
+    }
+}
