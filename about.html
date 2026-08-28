@@ -39,8 +39,9 @@
 
             <p>
                 Local applications are stored in the <strong>apps</strong> folder,
-                with each application having its own folder and index.html file.
-                External educational resources can be represented as ordinary links.
+                with each application living in its own folder as a single,
+                self-contained HTML file. External educational resources can
+                be represented as ordinary links.
             </p>
 
             <h3>Folder Structure</h3>
@@ -49,13 +50,14 @@
 ├── index.html
 ├── about.html
 ├── style.css
+├── cursor-glow.js
 └── apps/
     ├── app1/
-    │   └── index.html
+    │   └── app1.html
     ├── app2/
-    │   └── index.html
+    │   └── app2.html
     └── app3/
-        └── index.html</code></pre>
+        └── app3.html</code></pre>
 
             <a href="index.html" class="app-button">
                 Back to Applications
@@ -69,5 +71,6 @@
         <p>Educational Hub</p>
     </footer>
 
+    <script src="cursor-glow.js" defer></script>
 </body>
 </html>
