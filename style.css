@@ -1,5 +1,20 @@
+/* =========================
+   FONTS
+
+   Lora (serif) carries headings for a more academic, institutional
+   feel. Inter carries body copy and UI for clean readability.
+   JetBrains Mono is kept only for code/folder-structure blocks.
+========================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* =========================
+   GENERAL / COLOR SYSTEM
+
+   School colors first: navy/blue as the professional base, orange
+   as the energetic accent reserved for calls-to-action and highlights.
+========================= */
+
 * {
     box-sizing: border-box;
 }
@@ -28,9 +43,17 @@
     --text-dim: #5b6b82;
     --text-on-dark: #eef4fb;
     --text-on-dark-dim: #a9bfd9;
+
     --shadow-sm: 0 1px 2px rgba(13, 37, 67, 0.06), 0 1px 1px rgba(13, 37, 67, 0.04);
     --shadow-md: 0 8px 20px rgba(13, 37, 67, 0.08), 0 2px 6px rgba(13, 37, 67, 0.06);
     --shadow-lg: 0 20px 44px rgba(13, 37, 67, 0.14);
+
+    /* ---- Glass surface system ----
+       Light glass = frosted white panels (cards, footer well, code blocks).
+       Dark glass   = frosted navy panels (topbar, hero, footer, viewer bar).
+       Every glass surface pairs a translucent fill with a soft inset
+       highlight along its top edge, mimicking light catching a curved
+       glass rim, plus an ambient shadow for depth underneath. */
     --glass-blur: 22px;
 
     --glass-light-bg: rgba(255, 255, 255, 0.58);
@@ -63,6 +86,14 @@ body {
 
     overflow-x: hidden;
 }
+
+/* =========================
+   AMBIENT BACKGROUND GLOW
+   Soft, fixed, blurred color underneath everything. This is what the
+   frosted glass surfaces (topbar, hero, cards, footer) actually pick
+   up through backdrop-filter -- without color behind them, glass
+   panels just look like plain gray boxes.
+========================= */
 
 .bg-glow {
     position: fixed;
@@ -123,6 +154,9 @@ body {
 h1, h2, h3 {
     font-family: 'Lora', Georgia, serif;
 }
+
+/* Thin school-color bar fixed to the very top of the viewport --
+   a simple, classic branding touch that now sits above the glass. */
 body::before {
     content: '';
     position: fixed;
@@ -159,12 +193,20 @@ body::before {
     outline-offset: 3px;
     border-radius: 6px;
 }
+
+/* A subtle mouse-only trail. The script does not load this effect for touch
+   devices or when the visitor requests reduced motion. */
 .cursor-glow-canvas {
     position: fixed;
     inset: 0;
     z-index: 9999;
     pointer-events: none;
 }
+
+
+/* =========================
+   TOP BAR
+========================= */
 
 .topbar {
     display: flex;
@@ -193,6 +235,8 @@ body::before {
     align-items: center;
     gap: 14px;
 }
+
+/* Small circular monogram badge standing in for a school/hub crest */
 .topbar > div::before,
 .app-brand::before {
     content: '\1F393';
@@ -233,6 +277,11 @@ body::before {
     text-transform: uppercase;
 }
 
+
+/* =========================
+   NAVIGATION
+========================= */
+
 .nav-button {
     display: inline-block;
 
@@ -265,6 +314,12 @@ body::before {
 }
 
 
+/* =========================
+   PRIMARY ACTION BUTTONS
+   Translucent orange glass pills, shared by every "open/launch" style
+   button across the site. A soft inner highlight along the top edge
+   stands in for light catching a curved glass rim.
+========================= */
 
 .app-button,
 .home-button,
@@ -329,6 +384,14 @@ main {
     width: min(1100px, 90%);
     margin: 0 auto 60px;
 }
+
+/* =========================
+   HERO BANNER
+   A rounded, floating glass panel rather than a full-bleed hard-edged
+   block -- it sits inset within the content column so its rounded
+   corners and blurred edges read as glass, not a corporate banner.
+========================= */
+
 .hero {
     position: relative;
     overflow: hidden;
@@ -454,6 +517,14 @@ main {
     margin-left: 16px;
     background: var(--border-strong);
 }
+
+
+/* =========================
+   FAVORITE SPOTLIGHT
+   Rendered as a wide "pinned resource" banner rather than a large
+   centered glowing card, so it reads like a dashboard quick-access
+   strip instead of a hero game tile.
+========================= */
 
 .favorite-section {
     display: flex;
@@ -611,6 +682,11 @@ main {
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.4), transparent 42%);
     pointer-events: none;
 }
+
+/* Cursor-following highlight -- light refracting across the glass as
+   the pointer moves. --mx/--my are set by the page's mousemove
+   listener; they default to center so the card looks fine before
+   the first pointer move. */
 .app-card::after {
     content: '';
     position: absolute;
