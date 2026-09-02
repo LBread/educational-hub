@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruler Reading Practice | Educational Hub</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    .ruler-page { min-height: 100vh; }
+    .ruler-page .app-topbar { gap: 20px; }
+    .app-brand p { margin: 1px 0 0; color: var(--text-on-dark-dim); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .ruler-main { width: min(980px, 92%); margin: 34px auto 56px; }
+    .practice-intro { text-align: center; margin-bottom: 20px; }
+    .practice-intro h2 { margin: 0; color: var(--navy-900); font-size: clamp(1.8rem, 4vw, 2.5rem); }
+    .practice-intro p { margin: 6px 0 0; color: var(--text-dim); }
+    .practice-card {
+      padding: clamp(20px, 4vw, 36px);
+      background: var(--glass-light-bg-strong);
+      backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-light-border);
+      border-radius: 24px;
+      box-shadow: inset 0 1px 0 var(--glass-light-highlight), var(--glass-light-shadow);
+    }
+    .mode-row, .game-status { display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .mode-picker { display: inline-flex; padding: 4px; background: rgba(13,37,67,.1); border-radius: 999px; }
+    .mode-picker button {
+      border: 0; border-radius: 999px; padding: 9px 16px; background: transparent;
+      color: var(--navy-900); font: 600 14px Inter, sans-serif; cursor: pointer;
+    }
+    .mode-picker button[aria-pressed="true"] { color: #fff; background: var(--blue-700); box-shadow: var(--shadow-sm); }
+    .timer { margin: 0; color: var(--navy-900); font-size: 15px; font-weight: 800; }
+    .timer.is-urgent { color: var(--orange-700); }
+    .round-button { margin-left: auto; }
+    .target { margin: 30px 0 12px; color: var(--navy-900); text-align: center; font: 700 clamp(1.35rem, 3vw, 1.8rem) Lora, Georgia, serif; }
+    .target strong { color: var(--orange-700); }
+    .ruler-stage { position: relative; }
+    .ruler-wrap { overflow-x: auto; padding: 26px 10px 16px; border-radius: 16px; background: rgba(13,37,67,.06); }
+    canvas { display: block; width: 100%; min-width: 650px; height: 180px; cursor: crosshair; touch-action: manipulation; }
+    canvas.is-locked { cursor: default; }
+    .ruler-overlay {
+      position: absolute; inset: 0; display: grid; place-items: center; padding: 20px;
+      pointer-events: none; opacity: 0; transition: opacity .3s ease;
+    }
+    .ruler-overlay.is-visible { opacity: 1; }
+    .ruler-overlay__panel {
+      max-width: min(440px, 88%); padding: 18px 24px; color: #fff; text-align: center;
+      background: rgba(13,37,67,.92); border: 2px solid rgba(255,255,255,.5);
+      border-radius: 18px; box-shadow: 0 12px 30px rgba(13,37,67,.3);
+      font: 700 clamp(1.1rem, 2.7vw, 1.5rem) Lora, Georgia, serif;
+    }
+    .ruler-overlay__panel span { display: block; margin-top: 7px; font: 600 14px Inter, sans-serif; }
+    .ruler-overlay.countdown .ruler-overlay__panel {
+      color: var(--orange-100); font-size: clamp(3.2rem, 9vw, 5rem);
+      animation: countdownPop .75s ease-in-out infinite alternate;
+    }
+    @keyframes countdownPop { from { transform: scale(.82); } to { transform: scale(1.08); } }
+    .game-status { margin-top: 20px; }
+    .score, .strikes { margin: 0; color: var(--text-dim); font-weight: 700; }
+    .strike-dot { color: var(--orange-700); letter-spacing: 2px; }
+    .feedback { min-height: 28px; margin: 18px 0 0; text-align: center; font-weight: 700; }
+    .feedback.correct { color: #18724a; }
+    .feedback.incorrect { color: #a93b19; }
+    .feedback.finished { color: var(--navy-900); }
+    .help { margin: 26px 0 0; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 14px; }
+    .help summary { cursor: pointer; color: var(--blue-700); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .ruler-page .app-topbar { padding: 13px 18px; }
+      .app-brand h1 { font-size: 18px; }
+      .app-brand p { display: none; }
+      .ruler-main { margin-top: 24px; }
+      .mode-row, .game-status { justify-content: center; }
+      .round-button { margin-left: 0; }
+    }
+  </style>
+</head>
+<body class="app-viewer-page ruler-page">
+  <header class="app-topbar">
+    <div class="app-brand">
+      <div>
+        <h1>Application Hub</h1>
+        <p>Educational resources &amp; tools</p>
+      </div>
+    </div>
+    <a href="../../index.html" class="nav-button">← All apps</a>
+  </header>
+
+  <main class="ruler-main">
+    <section class="practice-intro">
+      <h2>Ruler Reading Practice</h2>
+      <p>Click the mark named above the ruler before time runs out.</p>
+    </section>
+
+    <section class="practice-card">
+      <div class="mode-row">
+        <div class="mode-picker" aria-label="Measurement system">
+          <button type="button" data-mode="inch" aria-pressed="true">Inches</button>
+          <button type="button" data-mode="metric" aria-pressed="false">Metric</button>
+        </div>
+        <p class="timer" id="timer">Time: 60s</p>
+        <button class="app-button round-button" id="restartButton" type="button">Start round</button>
+      </div>
+
+      <p class="target" id="target"><strong>Press Start round to begin</strong></p>
+
+      <div class="ruler-stage">
+        <div class="ruler-wrap">
+          <canvas id="ruler" class="is-locked" width="900" height="180"></canvas>
+        </div>
+        <div class="ruler-overlay" id="rulerOverlay">
+          <div class="ruler-overlay__panel" id="overlayText"></div>
+        </div>
+      </div>
+
+      <div class="game-status">
+        <p class="score" id="score">Correct: 0</p>
+        <p class="strikes" id="strikes">Strikes: <span class="strike-dot">○ ○ ○</span></p>
+      </div>
+
+      <p class="feedback" id="feedback"></p>
+
+      <details class="help">
+        <summary>How to play</summary>
+        <p>Click the requested tick mark. A round lasts 60 seconds and ends after three incorrect clicks. Inch mode uses sixteenths on a 4-inch ruler; metric mode uses millimetres on a 10-centimetre ruler.</p>
+      </details>
+    </section>
+  </main>
+
+  <script src="../../cursor-glow.js" defer></script>
+  <script>
+    (function () {
+      var mode = 'inch';
+      var target = 0;
+      var correct = 0;
+      var strikes = 0;
+      var seconds = 60;
+      var gameOver = true;
+      var paused = false;
+      var hoverTarget = null;
+      var timerId = null;
+      var nextQuestionId = null;
+      var countdownId = null;
+
+      var canvas = document.getElementById('ruler');
+      var ctx = canvas.getContext('2d');
+      var targetLabel = document.getElementById('target');
+      var timerLabel = document.getElementById('timer');
+      var scoreLabel = document.getElementById('score');
+      var strikesLabel = document.getElementById('strikes');
+      var feedback = document.getElementById('feedback');
+      var restartButton = document.getElementById('restartButton');
+      var rulerOverlay = document.getElementById('rulerOverlay');
+      var overlayText = document.getElementById('overlayText');
+
+      function fractionText(value) {
+        var whole = Math.floor(value);
+        var sixteenths = Math.round((value - whole) * 16);
+        if (sixteenths === 16) { whole++; sixteenths = 0; }
+        if (!sixteenths) return String(whole);
+
+        function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+
+        var divisor = gcd(sixteenths, 16);
+        return (whole ? whole + ' ' : '') + (sixteenths / divisor) + '/' + (16 / divisor);
+      }
+
+      function targetText(value) {
+        return mode === 'inch'
+          ? fractionText(value / 16) + ' in'
+          : (value / 10).toFixed(1).replace('.0', '') + ' cm';
+      }
+
+      function range() {
+        return mode === 'inch' ? 64 : 100;
+      }
+
+      function drawRuler() {
+        var left = 38;
+        var right = canvas.width - 38;
+        var base = 126;
+        var totalTicks = range();
+        var step = (right - left) / totalTicks;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fffdf5';
+        ctx.fillRect(left, 26, right - left, 112);
+        ctx.strokeStyle = '#9c8c61';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(left, 26, right - left, 112);
+
+        if (hoverTarget !== null) {
+          var guideX = left + hoverTarget * step;
+          ctx.fillStyle = 'rgba(34, 154, 102, 0.30)';
+          ctx.fillRect(left, 28, Math.max(0, guideX - left), 108);
+          ctx.strokeStyle = '#18724a';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(guideX, 28);
+          ctx.lineTo(guideX, 136);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#26384f';
+        ctx.fillStyle = '#26384f';
+        ctx.lineWidth = 1;
+
+        for (var i = 0; i <= totalTicks; i++) {
+          var x = left + i * step;
+          var size;
+
+          if (mode === 'inch') {
+            size = i % 16 === 0 ? 74 : i % 8 === 0 ? 57 : i % 4 === 0 ? 45 : i % 2 === 0 ? 34 : 25;
+          } else {
+            size = i % 10 === 0 ? 74 : i % 5 === 0 ? 48 : 29;
+          }
+
+          ctx.beginPath();
+          ctx.moveTo(x, base);
+          ctx.lineTo(x, base - size);
+          ctx.stroke();
+
+          if ((mode === 'inch' && i % 16 === 0) || (mode === 'metric' && i % 10 === 0)) {
+            ctx.font = '600 13px Inter, Arial';
+            ctx.textAlign = i === 0 ? 'left' : i === totalTicks ? 'right' : 'center';
+            ctx.fillText(mode === 'inch' ? i / 16 : i / 10, x, 48);
+          }
+        }
+      }
+
+      function updateStatus() {
+        timerLabel.textContent = 'Time: ' + seconds + 's';
+        timerLabel.classList.toggle('is-urgent', seconds <= 10);
+        scoreLabel.textContent = 'Correct: ' + correct;
+
+        var marks = '';
+        for (var i = 0; i < 3; i++) {
+          marks += i < strikes ? '● ' : '○ ';
+        }
+        strikesLabel.innerHTML = 'Strikes: <span class="strike-dot">' + marks.trim() + '</span>';
+      }
+
+      function setOverlay(content, kind) {
+        rulerOverlay.className = 'ruler-overlay is-visible' + (kind ? ' ' + kind : '');
+        overlayText.innerHTML = content;
+      }
+
+      function clearOverlay() {
+        rulerOverlay.className = 'ruler-overlay';
+        overlayText.textContent = '';
+      }
+
+      function lockRuler(locked) {
+        canvas.classList.toggle('is-locked', locked);
+      }
+
+      function newTarget() {
+        target = mode === 'inch'
+          ? 4 + Math.floor(Math.random() * 57)
+          : 5 + Math.floor(Math.random() * 91);
+
+        hoverTarget = null;
+        targetLabel.innerHTML = 'Click <strong>' + targetText(target) + '</strong>';
+        drawRuler();
+      }
+
+      function endGame(message) {
+        gameOver = true;
+        paused = true;
+        clearInterval(timerId);
+        clearTimeout(nextQuestionId);
+        clearInterval(countdownId);
+        lockRuler(true);
+
+        targetLabel.innerHTML = '<strong>Round complete</strong>';
+        feedback.textContent = message + ' You got ' + correct + ' correct.';
+        feedback.className = 'feedback finished';
+        restartButton.textContent = 'Start new round';
+      }
+
+      function beginGame() {
+        clearOverlay();
+        gameOver = false;
+        paused = false;
+        lockRuler(false);
+        restartButton.textContent = 'Restart round';
+        newTarget();
+
+        timerId = setInterval(function () {
+          seconds--;
+          updateStatus();
+          if (seconds <= 0) endGame('Time is up!');
+        }, 1000);
+      }
+
+      function startRound() {
+        clearInterval(timerId);
+        clearTimeout(nextQuestionId);
+        clearInterval(countdownId);
+
+        correct = 0;
+        strikes = 0;
+        seconds = 60;
+        gameOver = true;
+        paused = true;
+        hoverTarget = null;
+
+        feedback.textContent = '';
+        feedback.className = 'feedback';
+        targetLabel.innerHTML = '<strong>Get ready</strong>';
+        restartButton.textContent = 'Starting…';
+        lockRuler(true);
+        updateStatus();
+        drawRuler();
+
+        var count = 3;
+        setOverlay(String(count), 'countdown');
+
+        countdownId = setInterval(function () {
+          count--;
+
+          if (count > 0) {
+            setOverlay(String(count), 'countdown');
+            return;
+          }
+
+          clearInterval(countdownId);
+          setOverlay('Go!', 'countdown');
+          nextQuestionId = setTimeout(beginGame, 400);
+        }, 1000);
+      }
+
+      function prepareRound() {
+        clearInterval(timerId);
+        clearInterval(countdownId);
+        clearTimeout(nextQuestionId);
+
+        gameOver = true;
+        paused = false;
+        hoverTarget = null;
+        correct = 0;
+        strikes = 0;
+        seconds = 60;
+
+        targetLabel.innerHTML = '<strong>Press Start round to begin</strong>';
+        feedback.textContent = '';
+        feedback.className = 'feedback';
+        restartButton.textContent = 'Start round';
+
+        lockRuler(true);
+        clearOverlay();
+        updateStatus();
+        drawRuler();
+      }
+
+      function selectionFromEvent(event) {
+        var rect = canvas.getBoundingClientRect();
+        var x = (event.clientX - rect.left) * (canvas.width / rect.width);
+        var left = 38;
+        var right = canvas.width - 38;
+
+        if (x < left - 10 || x > right + 10) return null;
+
+        return Math.max(
+          0,
+          Math.min(range(), Math.round((x - left) / ((right - left) / range())))
+        );
+      }
+
+      canvas.addEventListener('pointermove', function (event) {
+        if (gameOver || paused) return;
+        hoverTarget = selectionFromEvent(event);
+        drawRuler();
+      });
+
+      canvas.addEventListener('pointerleave', function () {
+        if (gameOver || paused) return;
+        hoverTarget = null;
+        drawRuler();
+      });
+
+      canvas.addEventListener('click', function (event) {
+        if (gameOver || paused) return;
+
+        var selected = selectionFromEvent(event);
+        if (selected === null) return;
+
+        paused = true;
+        hoverTarget = selected;
+        drawRuler();
+
+        if (selected === target) {
+          correct++;
+          feedback.textContent = 'Correct — find the next mark.';
+          feedback.className = 'feedback correct';
+
+          nextQuestionId = setTimeout(function () {
+            paused = false;
+            newTarget();
+          }, 450);
+        } else {
+          strikes++;
+          feedback.textContent = 'Strike ' + strikes + ' of 3.';
+          feedback.className = 'feedback incorrect';
+
+          setOverlay(
+            'You chose <strong>' + targetText(selected) + '</strong>' +
+            '<span>Correct answer: <strong>' + targetText(target) + '</strong></span>',
+            'answer'
+          );
+
+          if (strikes === 3) {
+            gameOver = true;
+            clearInterval(timerId);
+            lockRuler(true);
+            updateStatus();
+
+            nextQuestionId = setTimeout(function () {
+              clearOverlay();
+              nextQuestionId = setTimeout(function () {
+                endGame('Three strikes!');
+              }, 320);
+            }, 1500);
+
+            return;
+          }
+
+          nextQuestionId = setTimeout(function () {
+            clearOverlay();
+            nextQuestionId = setTimeout(function () {
+              paused = false;
+              newTarget();
+            }, 320);
+          }, 1500);
+        }
+
+        updateStatus();
+      });
+
+      restartButton.addEventListener('click', startRound);
+
+      document.querySelectorAll('[data-mode]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          mode = button.dataset.mode;
+
+          document.querySelectorAll('[data-mode]').forEach(function (item) {
+            item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
+          });
+
+          prepareRound();
+        });
+      });
+
+      prepareRound();
+    })();
+  </script>
+</body>
+</html>
