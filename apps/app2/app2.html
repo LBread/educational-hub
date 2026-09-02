@@ -23,6 +23,7 @@
       box-shadow: inset 0 1px 0 var(--glass-light-highlight), var(--glass-light-shadow);
     }
 
+    /* ---- status row ---- */
     .stats-row {
       display: flex; flex-wrap: wrap; gap: 10px 22px;
       align-items: center; justify-content: space-between;
@@ -33,6 +34,8 @@
     .lives { display: flex; align-items: center; gap: 4px; }
     .lives svg { display: block; }
     .lives .lost { opacity: .55; }
+
+    /* ---- level progress ---- */
     .level-track {
       margin-top: 14px;
       height: 6px; border-radius: 999px;
@@ -67,8 +70,8 @@
     .target strong {
       display: inline-block; margin-top: 4px;
       color: var(--orange-700);
-      font: 800 clamp(1.4rem, 6vw, 3.4rem) 'JetBrains Mono', Consolas, monospace;
-      letter-spacing: 1px; word-break: break-all; max-width: 100%;
+      font: 800 clamp(2.4rem, 9vw, 3.4rem) 'JetBrains Mono', Consolas, monospace;
+      letter-spacing: 1px;
     }
 
     /* ---- bit toggles ---- */
@@ -97,25 +100,11 @@
       color: #fff;
     }
     .bit-btn:disabled { cursor: default; opacity: .7; }
-    .bits-stage.is-compact { gap: 3px; }
-    .bits-stage.is-compact .bit-col { gap: 3px; }
-    .bits-stage.is-compact .bit-place { font-size: 8.5px; }
-    .bits-stage.is-compact .bit-btn {
-      width: clamp(22px, 5.4vw, 32px); height: clamp(26px, 6.4vw, 38px);
-      border-radius: 8px; font-size: clamp(.7rem, 2.2vw, .95rem);
-    }
-    .bits-stage.is-ultra-compact { gap: 2px; }
-    .bits-stage.is-ultra-compact .bit-col { gap: 2px; }
-    .bits-stage.is-ultra-compact .bit-place { font-size: 7px; }
-    .bits-stage.is-ultra-compact .bit-btn {
-      width: clamp(14px, 3.4vw, 20px); height: clamp(18px, 4.2vw, 26px);
-      border-radius: 5px; font-size: clamp(.55rem, 1.6vw, .7rem);
-    }
 
     .binary-readout {
       margin: 4px 0 0; text-align: center;
       color: var(--text-dim); font: 600 14px 'JetBrains Mono', Consolas, monospace;
-      letter-spacing: 2px; word-break: break-all;
+      letter-spacing: 2px;
     }
 
     .action-row { display: flex; justify-content: center; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
@@ -132,6 +121,8 @@
     .feedback.correct { color: #18724a; }
     .feedback.incorrect { color: #a93b19; }
     .feedback.finished { color: var(--navy-900); }
+
+    /* correct/incorrect flash on the whole card */
     .practice-card.flash-correct { animation: flashCorrect .5s ease; }
     .practice-card.flash-incorrect { animation: flashIncorrect .5s ease; }
     @keyframes flashCorrect { 0% { box-shadow: 0 0 0 4px rgba(24,114,74,0) inset; } 30% { box-shadow: 0 0 0 4px rgba(24,114,74,.45) inset; } 100% { box-shadow: 0 0 0 4px rgba(24,114,74,0) inset; } }
@@ -170,7 +161,7 @@
   <main class="binary-main">
     <section class="practice-intro">
       <h2>Binary Number Game</h2>
-      <p>Convert the decimal number into binary by toggling the bits before time runs out</p>
+      <p>Convert the decimal number into binary by toggling the bits before time runs out.</p>
     </section>
 
     <section class="practice-card" id="card">
@@ -203,7 +194,7 @@
 
       <details class="help">
         <summary>How to play</summary>
-        <p>Toggle the bit buttons to build the binary value that equals the decimal target shown above the round completes automatically the moment your bits match. Each correct answer adds to your score and streak; a wrong answer or an empty timer costs a life. Get three answers right at a level to unlock the next one the register grows from 4 bits all the way up to a full 128-bit number, while the time per question keeps shrinking. Leveling up pauses briefly so you can see the new rules before the clock starts.</p>
+        <p>Toggle the bit buttons to build the binary value that equals the decimal target shown above the round completes automatically the moment your bits match. Each correct answer adds to your score and streak; a wrong answer or an empty timer costs a life. Get three answers right at a level to unlock the next one the register grows from 4 bits up to a full byte (8 bits, so the leftmost bit is worth 128), while the time per question keeps shrinking. Leveling up pauses briefly so you can see the new rules before the clock starts.</p>
       </details>
     </section>
   </main>
@@ -215,11 +206,7 @@
         { bits: 5, time: 18 },
         { bits: 6, time: 16 },
         { bits: 7, time: 14 },
-        { bits: 8, time: 12 },
-        { bits: 16, time: 10 },
-        { bits: 32, time: 8 },
-        { bits: 64, time: 6 },
-        { bits: 128, time: 5 }
+        { bits: 8, time: 12 }
       ];
       var LEVEL_UP_DELAY = 1600;  // pause (ms) shown after leveling up, before the next question starts
       var CORRECT_PER_LEVEL = 3;
@@ -228,7 +215,7 @@
 
       var levelIndex = 0;
       var bits = [];
-      var target = 0n;
+      var target = 0;
       var score = 0;
       var streak = 0;
       var lives = START_LIVES;
@@ -262,20 +249,13 @@
       }
 
       function placeValue(i, total) {
-        return 1n << BigInt(total - 1 - i);
-      }
-      function placeLabel(i, total) {
-        var exponent = total - 1 - i;
-        if (total <= 16) return String(Math.pow(2, exponent));
-        return '2^' + exponent;
+        return Math.pow(2, total - 1 - i);
       }
 
       function buildBitButtons() {
         var lvl = currentLevel();
         bits = new Array(lvl.bits).fill(0);
         bitsStage.innerHTML = '';
-        bitsStage.classList.toggle('is-compact', lvl.bits > 8);
-        bitsStage.classList.toggle('is-ultra-compact', lvl.bits > 32);
 
         for (var i = 0; i < lvl.bits; i++) {
           (function (index) {
@@ -284,7 +264,7 @@
 
             var place = document.createElement('span');
             place.className = 'bit-place';
-            place.textContent = placeLabel(index, lvl.bits);
+            place.textContent = placeValue(index, lvl.bits);
             col.appendChild(place);
 
             var btn = document.createElement('button');
@@ -317,9 +297,9 @@
       }
 
       function bitsValue() {
-        var value = 0n;
+        var value = 0;
         for (var i = 0; i < bits.length; i++) {
-          if (bits[i]) value |= placeValue(i, bits.length);
+          value += bits[i] * placeValue(i, bits.length);
         }
         return value;
       }
@@ -329,6 +309,10 @@
         buttons.forEach(function (b) { b.disabled = !enabled; });
         clearButton.disabled = !enabled;
       }
+
+      // A small hand-built heart icon (no emoji font dependency), drawn from
+      // two circles and a rotated square, filled for a life remaining and
+      // outlined for a life lost.
       function heartIcon(filled) {
         var fill = filled ? 'var(--orange-600)' : 'none';
         var stroke = filled ? 'var(--orange-700)' : 'var(--border-strong)';
@@ -358,20 +342,11 @@
           ? 'Max level reached — keep the streak going!'
           : (CORRECT_PER_LEVEL - levelCorrect) + ' more correct to reach level ' + (levelIndex + 2);
       }
-      function randomTarget(bitCount) {
-        var value;
-        do {
-          value = 0n;
-          for (var i = 0; i < bitCount; i++) {
-            value = (value << 1n) | (Math.random() < 0.5 ? 0n : 1n);
-          }
-        } while (value === 0n);
-        return value;
-      }
 
       function newTarget() {
         var lvl = currentLevel();
-        target = randomTarget(lvl.bits);
+        var max = Math.pow(2, lvl.bits) - 1;
+        target = 1 + Math.floor(Math.random() * max); // avoid 0 for a real challenge
         targetLabel.innerHTML = 'Convert to binary<br><strong>' + target + '</strong>';
         buildBitButtons();
       }
@@ -383,7 +358,7 @@
 
       function startTimer() {
         var lvl = currentLevel();
-        timeLeft = lvl.time * 10;
+        timeLeft = lvl.time * 10; // tenths of a second, for smooth bar
         updateTimerBar();
 
         stopTimer();
