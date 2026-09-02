@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Number Game | Educational Hub</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    .binary-page { min-height: 100vh; }
+    .binary-main { width: min(760px, 92%); margin: 34px auto 56px; }
+    .app-brand p { margin: 1px 0 0; color: var(--text-on-dark-dim); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+
+    .practice-intro { text-align: center; margin-bottom: 20px; }
+    .practice-intro h2 { margin: 0; color: var(--navy-900); font-size: clamp(1.8rem, 4vw, 2.5rem); }
+    .practice-intro p { margin: 6px 0 0; color: var(--text-dim); }
+
+    .practice-card {
+      padding: clamp(20px, 4vw, 36px);
+      background: var(--glass-light-bg-strong);
+      backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-light-border);
+      border-radius: 24px;
+      box-shadow: inset 0 1px 0 var(--glass-light-highlight), var(--glass-light-shadow);
+    }
+
+    .stats-row {
+      display: flex; flex-wrap: wrap; gap: 10px 22px;
+      align-items: center; justify-content: space-between;
+    }
+    .stat-group { display: flex; flex-wrap: wrap; gap: 16px; }
+    .stat { color: var(--text-dim); font-size: 13.5px; font-weight: 600; }
+    .stat b { display: block; color: var(--navy-900); font-size: 19px; font-weight: 800; font-family: 'Lora', Georgia, serif; }
+    .lives { display: flex; align-items: center; gap: 4px; }
+    .lives svg { display: block; }
+    .lives .lost { opacity: .55; }
+    .level-track {
+      margin-top: 14px;
+      height: 6px; border-radius: 999px;
+      background: rgba(13,37,67,.08); overflow: hidden;
+    }
+    .level-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--blue-500), var(--blue-700));
+      transition: width .35s ease;
+    }
+    .level-caption { margin: 6px 0 0; font-size: 12px; color: var(--text-dim); text-align: right; }
+
+    /* ---- timer ---- */
+    .timer-track {
+      margin-top: 22px;
+      height: 10px; border-radius: 999px;
+      background: rgba(13,37,67,.08); overflow: hidden;
+    }
+    .timer-fill {
+      height: 100%; width: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--orange-500), var(--orange-700));
+      transition: width .1s linear, background-color .2s ease;
+    }
+    .timer-fill.is-low { background: linear-gradient(90deg, #d64545, #a91f1f); }
+
+    /* ---- target number ---- */
+    .target {
+      margin: 22px 0 4px; text-align: center;
+      color: var(--navy-900);
+      font: 700 clamp(1.1rem, 2.6vw, 1.35rem) Inter, sans-serif;
+    }
+    .target strong {
+      display: inline-block; margin-top: 4px;
+      color: var(--orange-700);
+      font: 800 clamp(1.4rem, 6vw, 3.4rem) 'JetBrains Mono', Consolas, monospace;
+      letter-spacing: 1px; word-break: break-all; max-width: 100%;
+    }
+
+    /* ---- bit toggles ---- */
+    .bits-stage {
+      display: flex; justify-content: center; gap: clamp(4px, 1.6vw, 10px);
+      margin: 26px 0 14px; flex-wrap: nowrap;
+      overflow-x: auto; padding: 4px 2px 8px;
+    }
+    .bit-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; }
+    .bit-place { color: var(--text-dim); font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .bit-btn {
+      width: clamp(36px, 9vw, 54px); height: clamp(36px, 9vw, 54px);
+      border-radius: 12px; border: 2px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--navy-900);
+      font: 800 clamp(1.1rem, 3vw, 1.5rem) 'JetBrains Mono', Consolas, monospace;
+      cursor: pointer;
+      transition: transform .12s ease, background-color .15s ease, border-color .15s ease, color .15s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .bit-btn:hover { transform: translateY(-2px); border-color: var(--blue-500); }
+    .bit-btn:active { transform: translateY(0); }
+    .bit-btn.is-on {
+      background: linear-gradient(160deg, var(--blue-500), var(--blue-700));
+      border-color: var(--blue-700);
+      color: #fff;
+    }
+    .bit-btn:disabled { cursor: default; opacity: .7; }
+    .bits-stage.is-compact { gap: 3px; }
+    .bits-stage.is-compact .bit-col { gap: 3px; }
+    .bits-stage.is-compact .bit-place { font-size: 8.5px; }
+    .bits-stage.is-compact .bit-btn {
+      width: clamp(22px, 5.4vw, 32px); height: clamp(26px, 6.4vw, 38px);
+      border-radius: 8px; font-size: clamp(.7rem, 2.2vw, .95rem);
+    }
+    .bits-stage.is-ultra-compact { gap: 2px; }
+    .bits-stage.is-ultra-compact .bit-col { gap: 2px; }
+    .bits-stage.is-ultra-compact .bit-place { font-size: 7px; }
+    .bits-stage.is-ultra-compact .bit-btn {
+      width: clamp(14px, 3.4vw, 20px); height: clamp(18px, 4.2vw, 26px);
+      border-radius: 5px; font-size: clamp(.55rem, 1.6vw, .7rem);
+    }
+
+    .binary-readout {
+      margin: 4px 0 0; text-align: center;
+      color: var(--text-dim); font: 600 14px 'JetBrains Mono', Consolas, monospace;
+      letter-spacing: 2px; word-break: break-all;
+    }
+
+    .action-row { display: flex; justify-content: center; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+    .app-button.secondary {
+      background: rgba(13,37,67,.08);
+      color: var(--navy-900);
+      box-shadow: none;
+      border: 1px solid var(--border-strong);
+    }
+    .app-button.secondary:hover { filter: none; background: rgba(13,37,67,.14); box-shadow: none; }
+    .app-button:disabled { opacity: .5; cursor: default; transform: none !important; filter: none !important; }
+
+    .feedback { min-height: 30px; margin: 16px 0 0; text-align: center; font-weight: 700; }
+    .feedback.correct { color: #18724a; }
+    .feedback.incorrect { color: #a93b19; }
+    .feedback.finished { color: var(--navy-900); }
+    .practice-card.flash-correct { animation: flashCorrect .5s ease; }
+    .practice-card.flash-incorrect { animation: flashIncorrect .5s ease; }
+    @keyframes flashCorrect { 0% { box-shadow: 0 0 0 4px rgba(24,114,74,0) inset; } 30% { box-shadow: 0 0 0 4px rgba(24,114,74,.45) inset; } 100% { box-shadow: 0 0 0 4px rgba(24,114,74,0) inset; } }
+    @keyframes flashIncorrect { 0% { box-shadow: 0 0 0 4px rgba(169,59,25,0) inset; } 30% { box-shadow: 0 0 0 4px rgba(169,59,25,.45) inset; } 100% { box-shadow: 0 0 0 4px rgba(169,59,25,0) inset; } }
+    @keyframes shake { 10%,90% { transform: translateX(-2px); } 20%,80% { transform: translateX(4px); } 30%,50%,70% { transform: translateX(-8px); } 40%,60% { transform: translateX(8px); } }
+    .shake { animation: shake .45s ease; }
+
+    .help { margin: 26px 0 0; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 14px; }
+    .help summary { cursor: pointer; color: var(--blue-700); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .binary-page .app-topbar { padding: 13px 18px; }
+      .app-brand h1 { font-size: 18px; }
+      .app-brand p { display: none; }
+      .binary-main { margin-top: 24px; }
+      .stats-row { justify-content: center; text-align: center; }
+      .stat-group { justify-content: center; width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .practice-card.flash-correct, .practice-card.flash-incorrect, .shake { animation: none !important; }
+    }
+  </style>
+</head>
+<body class="app-viewer-page binary-page">
+  <header class="app-topbar">
+    <div class="app-brand">
+      <div>
+        <h1>Application Hub</h1>
+        <p>Educational resources &amp; tools</p>
+      </div>
+    </div>
+    <a href="../../index.html" class="nav-button">← All apps</a>
+  </header>
+
+  <main class="binary-main">
+    <section class="practice-intro">
+      <h2>Binary Number Game</h2>
+      <p>Convert the decimal number into binary by toggling the bits before time runs out</p>
+    </section>
+
+    <section class="practice-card" id="card">
+      <div class="stats-row">
+        <div class="stat-group">
+          <div class="stat">Level<b id="level">1</b></div>
+          <div class="stat">Score<b id="score">0</b></div>
+          <div class="stat">Streak<b id="streak">0</b></div>
+          <div class="stat">Best<b id="best">0</b></div>
+        </div>
+        <div class="lives" id="lives" aria-label="Lives remaining"></div>
+      </div>
+
+      <div class="level-track"><div class="level-fill" id="levelFill"></div></div>
+      <p class="level-caption" id="levelCaption">Answer correctly to level up</p>
+
+      <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+
+      <p class="target" id="target">Press <strong style="font-size:1.4rem;">New&nbsp;Game</strong> to begin</p>
+
+      <div class="bits-stage" id="bitsStage"></div>
+      <p class="binary-readout" id="binaryReadout">&nbsp;</p>
+
+      <div class="action-row">
+        <button class="app-button secondary" id="clearButton" type="button" disabled>Clear</button>
+        <button class="app-button" id="restartButton" type="button">New Game</button>
+      </div>
+
+      <p class="feedback" id="feedback"></p>
+
+      <details class="help">
+        <summary>How to play</summary>
+        <p>Toggle the bit buttons to build the binary value that equals the decimal target shown above the round completes automatically the moment your bits match. Each correct answer adds to your score and streak; a wrong answer or an empty timer costs a life. Get three answers right at a level to unlock the next one the register grows from 4 bits all the way up to a full 128-bit number, while the time per question keeps shrinking. Leveling up pauses briefly so you can see the new rules before the clock starts.</p>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var LEVELS = [
+        { bits: 4, time: 20 },
+        { bits: 5, time: 18 },
+        { bits: 6, time: 16 },
+        { bits: 7, time: 14 },
+        { bits: 8, time: 12 },
+        { bits: 16, time: 10 },
+        { bits: 32, time: 8 },
+        { bits: 64, time: 6 },
+        { bits: 128, time: 5 }
+      ];
+      var LEVEL_UP_DELAY = 1600;  // pause (ms) shown after leveling up, before the next question starts
+      var CORRECT_PER_LEVEL = 3;
+      var START_LIVES = 3;
+      var BEST_KEY = 'binaryGameHighScore';
+
+      var levelIndex = 0;
+      var bits = [];
+      var target = 0n;
+      var score = 0;
+      var streak = 0;
+      var lives = START_LIVES;
+      var levelCorrect = 0;
+      var best = Number(localStorage.getItem(BEST_KEY)) || 0;
+      var timeLeft = 0;
+      var timerId = null;
+      var gameOver = true;
+      var busy = false;
+
+      var card = document.getElementById('card');
+      var levelLabel = document.getElementById('level');
+      var scoreLabel = document.getElementById('score');
+      var streakLabel = document.getElementById('streak');
+      var bestLabel = document.getElementById('best');
+      var livesEl = document.getElementById('lives');
+      var levelFill = document.getElementById('levelFill');
+      var levelCaption = document.getElementById('levelCaption');
+      var timerFill = document.getElementById('timerFill');
+      var targetLabel = document.getElementById('target');
+      var bitsStage = document.getElementById('bitsStage');
+      var binaryReadout = document.getElementById('binaryReadout');
+      var clearButton = document.getElementById('clearButton');
+      var restartButton = document.getElementById('restartButton');
+      var feedback = document.getElementById('feedback');
+
+      bestLabel.textContent = best;
+
+      function currentLevel() {
+        return LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
+      }
+
+      function placeValue(i, total) {
+        return 1n << BigInt(total - 1 - i);
+      }
+      function placeLabel(i, total) {
+        var exponent = total - 1 - i;
+        if (total <= 16) return String(Math.pow(2, exponent));
+        return '2^' + exponent;
+      }
+
+      function buildBitButtons() {
+        var lvl = currentLevel();
+        bits = new Array(lvl.bits).fill(0);
+        bitsStage.innerHTML = '';
+        bitsStage.classList.toggle('is-compact', lvl.bits > 8);
+        bitsStage.classList.toggle('is-ultra-compact', lvl.bits > 32);
+
+        for (var i = 0; i < lvl.bits; i++) {
+          (function (index) {
+            var col = document.createElement('div');
+            col.className = 'bit-col';
+
+            var place = document.createElement('span');
+            place.className = 'bit-place';
+            place.textContent = placeLabel(index, lvl.bits);
+            col.appendChild(place);
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'bit-btn';
+            btn.textContent = '0';
+            btn.setAttribute('aria-pressed', 'false');
+            btn.addEventListener('click', function () {
+              if (gameOver || busy) return;
+              bits[index] = bits[index] ? 0 : 1;
+              btn.textContent = String(bits[index]);
+              btn.classList.toggle('is-on', !!bits[index]);
+              btn.setAttribute('aria-pressed', bits[index] ? 'true' : 'false');
+              updateReadout();
+              if (bitsValue() === target) {
+                handleAnswer(true, false);
+              }
+            });
+            col.appendChild(btn);
+
+            bitsStage.appendChild(col);
+          })(i);
+        }
+
+        updateReadout();
+      }
+
+      function updateReadout() {
+        binaryReadout.textContent = bits.join('');
+      }
+
+      function bitsValue() {
+        var value = 0n;
+        for (var i = 0; i < bits.length; i++) {
+          if (bits[i]) value |= placeValue(i, bits.length);
+        }
+        return value;
+      }
+
+      function setBitsEnabled(enabled) {
+        var buttons = bitsStage.querySelectorAll('.bit-btn');
+        buttons.forEach(function (b) { b.disabled = !enabled; });
+        clearButton.disabled = !enabled;
+      }
+      function heartIcon(filled) {
+        var fill = filled ? 'var(--orange-600)' : 'none';
+        var stroke = filled ? 'var(--orange-700)' : 'var(--border-strong)';
+        return '<svg class="' + (filled ? '' : 'lost') + '" width="20" height="20" viewBox="0 0 32 29" ' +
+          'aria-hidden="true"><path d="M16 27.5C6 21 1.5 15.6 1.5 9.8 1.5 5 5.2 1.5 9.7 1.5c2.7 0 5.1 1.4 6.3 3.6 ' +
+          '1.2-2.2 3.6-3.6 6.3-3.6 4.5 0 8.2 3.5 8.2 8.3 0 5.8-4.5 11.2-14.5 17.7z" ' +
+          'fill="' + fill + '" stroke="' + stroke + '" stroke-width="2" stroke-linejoin="round"/></svg>';
+      }
+
+      function renderLives() {
+        var html = '';
+        for (var i = 0; i < START_LIVES; i++) {
+          html += heartIcon(i < lives);
+        }
+        livesEl.innerHTML = html;
+      }
+
+      function renderStatus() {
+        levelLabel.textContent = levelIndex + 1;
+        scoreLabel.textContent = score;
+        streakLabel.textContent = streak;
+        renderLives();
+
+        var pct = Math.min(100, (levelCorrect / CORRECT_PER_LEVEL) * 100);
+        levelFill.style.width = pct + '%';
+        levelCaption.textContent = levelIndex >= LEVELS.length - 1
+          ? 'Max level reached — keep the streak going!'
+          : (CORRECT_PER_LEVEL - levelCorrect) + ' more correct to reach level ' + (levelIndex + 2);
+      }
+      function randomTarget(bitCount) {
+        var value;
+        do {
+          value = 0n;
+          for (var i = 0; i < bitCount; i++) {
+            value = (value << 1n) | (Math.random() < 0.5 ? 0n : 1n);
+          }
+        } while (value === 0n);
+        return value;
+      }
+
+      function newTarget() {
+        var lvl = currentLevel();
+        target = randomTarget(lvl.bits);
+        targetLabel.innerHTML = 'Convert to binary<br><strong>' + target + '</strong>';
+        buildBitButtons();
+      }
+
+      function stopTimer() {
+        clearInterval(timerId);
+        timerId = null;
+      }
+
+      function startTimer() {
+        var lvl = currentLevel();
+        timeLeft = lvl.time * 10;
+        updateTimerBar();
+
+        stopTimer();
+        timerId = setInterval(function () {
+          timeLeft--;
+          updateTimerBar();
+          if (timeLeft <= 0) {
+            stopTimer();
+            handleAnswer(false, true);
+          }
+        }, 100);
+      }
+
+      function updateTimerBar() {
+        var lvl = currentLevel();
+        var pct = Math.max(0, (timeLeft / (lvl.time * 10)) * 100);
+        timerFill.style.width = pct + '%';
+        timerFill.classList.toggle('is-low', pct <= 25);
+      }
+
+      function flashCard(kind) {
+        card.classList.remove('flash-correct', 'flash-incorrect');
+        void card.offsetWidth;
+        card.classList.add(kind === 'correct' ? 'flash-correct' : 'flash-incorrect');
+      }
+
+      function handleAnswer(isCorrect, timedOut) {
+        if (gameOver || busy) return;
+        busy = true;
+        stopTimer();
+        setBitsEnabled(false);
+
+        if (isCorrect) {
+          var lvl = currentLevel();
+          var bonus = Math.min(streak, 10) * 2;
+          var gained = 10 * (levelIndex + 1) + bonus;
+          score += gained;
+          streak++;
+          levelCorrect++;
+
+          flashCard('correct');
+          feedback.textContent = 'Correct! +' + gained + ' points.';
+          feedback.className = 'feedback correct';
+
+          var leveledUp = false;
+          if (levelCorrect >= CORRECT_PER_LEVEL && levelIndex < LEVELS.length - 1) {
+            levelIndex++;
+            levelCorrect = 0;
+            leveledUp = true;
+            feedback.textContent = 'Level up! Now level ' + (levelIndex + 1) +
+              ' — ' + currentLevel().bits + ' bits, ' + currentLevel().time + 's per question.';
+            feedback.className = 'feedback correct';
+          }
+
+          renderStatus();
+          setTimeout(function () {
+            if (gameOver) return;
+            busy = false;
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+            newTarget();
+            setBitsEnabled(true);
+            startTimer();
+          }, leveledUp ? LEVEL_UP_DELAY : 700);
+        } else {
+          streak = 0;
+          lives--;
+
+          flashCard('incorrect');
+          card.classList.add('shake');
+          setTimeout(function () { card.classList.remove('shake'); }, 460);
+
+          feedback.textContent = (timedOut ? "Time's up! " : 'Not quite. ') +
+            'The answer was ' + target.toString(2).padStart(bits.length, '0') + '.';
+          feedback.className = 'feedback incorrect';
+
+          renderStatus();
+
+          if (lives <= 0) {
+            setTimeout(endGame, 900);
+            return;
+          }
+
+          setTimeout(function () {
+            if (gameOver) return;
+            busy = false;
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+            newTarget();
+            setBitsEnabled(true);
+            startTimer();
+          }, 1200);
+        }
+      }
+
+      function endGame() {
+        gameOver = true;
+        busy = false;
+        stopTimer();
+        setBitsEnabled(false);
+
+        if (score > best) {
+          best = score;
+          localStorage.setItem(BEST_KEY, String(best));
+          bestLabel.textContent = best;
+          feedback.textContent = 'Game over — new best score: ' + score + '!';
+        } else {
+          feedback.textContent = 'Game over — final score: ' + score + '.';
+        }
+        feedback.className = 'feedback finished';
+        targetLabel.innerHTML = '<strong style="font-size:1.4rem;">Game over</strong>';
+        restartButton.textContent = 'Play again';
+      }
+
+      function startGame() {
+        stopTimer();
+        levelIndex = 0;
+        score = 0;
+        streak = 0;
+        lives = START_LIVES;
+        levelCorrect = 0;
+        gameOver = false;
+        busy = false;
+
+        feedback.textContent = '';
+        feedback.className = 'feedback';
+        restartButton.textContent = 'Restart';
+
+        renderStatus();
+        newTarget();
+        setBitsEnabled(true);
+        startTimer();
+      }
+
+      clearButton.addEventListener('click', function () {
+        if (gameOver || busy) return;
+        var buttons = bitsStage.querySelectorAll('.bit-btn');
+        buttons.forEach(function (b, i) {
+          bits[i] = 0;
+          b.textContent = '0';
+          b.classList.remove('is-on');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        updateReadout();
+      });
+
+      restartButton.addEventListener('click', startGame);
+
+      renderStatus();
+    })();
+  </script>
+</body>
+</html>
