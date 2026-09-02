@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Application Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="bg-glow" aria-hidden="true">
+        <span class="bg-glow__blob bg-glow__blob--1"></span>
+        <span class="bg-glow__blob bg-glow__blob--2"></span>
+        <span class="bg-glow__blob bg-glow__blob--3"></span>
+    </div>
+
+    <header class="topbar">
+        <div>
+            <h1>Application Hub.</h1>
+            <p class="subtitle">educational resources & tools by Ephraim Keate.</p>
+        </div>
+
+        <a href="about.html" class="nav-button">About</a>
+    </header>
+
+    <main>
+
+        <section class="hero">
+            <h2>Educational Apps & Resources</h2>
+            <p>Select an educational app or resource below to get started.</p>
+        </section>
+
+        <section class="favorite-section" id="favoriteSection"></section>
+        <div id="categoryContainer"></div>
+
+    </main>
+
+    <footer>
+        <p>Educational Hub</p>
+    </footer>
+
+    <script src="cursor-glow.js" defer></script>
+    <script>
+        // This registry is the single source of truth for the app cards.
+        // Each app supplies its own icon, which is rendered automatically.
+        const Apps = [
+            {
+                id: 'ruler reading',
+                icon: '📏',
+                title: 'Ruler Reading Practice',
+                desc: 'Practice reading inch and metric rulers, one measurement at a time.',
+                path: 'apps/app1/app1.html',
+                category: 'Architecture'
+            },
+            {
+            
+                id: 'Binary Game',
+                icon: '💻',
+                title: 'Binary Practice',
+                desc: 'Practice converting binary number to values.',
+                path: 'apps/app2/app2.html',
+                category: 'Coding'
+            }
+        ];
+//fix
+        const CATEGORY_ORDER = ['Math', 'Science', 'English', 'History', 'Geography', 'Coding', 'Study Tools', 'Reference', 'Other', 'Architecture', 'Music', 'Languages', 'Health', 'Social Studies', 'Economics', 'Philosophy', 'Psychology'];
+
+        // favorite application spotlight slot
+        const FAVORITE_KEY = 'educationalHubFavoriteAppId';
+
+        function getFavoriteId() {
+            return localStorage.getItem(FAVORITE_KEY);
+        }
+
+        function setFavoriteId(id) {
+            if (id) {
+                localStorage.setItem(FAVORITE_KEY, id);
+            } else {
+                localStorage.removeItem(FAVORITE_KEY);
+            }
+        }
+
+        function attachGlow(card) {
+            card.addEventListener('mousemove', function (e) {
+                var rect = card.getBoundingClientRect();
+                card.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+                card.style.setProperty('--my', ((e.clientY - rect.top) / rect.height * 100) + '%');
+            });
+        }
+
+        function createFavToggle(app) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'fav-toggle';
+            btn.setAttribute('aria-label', 'Toggle favorite application');
+            btn.setAttribute('title', 'Favorite application');
+            btn.textContent = '★';
+            if (getFavoriteId() === app.id) btn.classList.add('is-fav');
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var isCurrentlyFav = getFavoriteId() === app.id;
+                setFavoriteId(isCurrentlyFav ? null : app.id);
+                render();
+            });
+
+            return btn;
+        }
+
+        function createCard(app, featured) {
+            var card = document.createElement('article');
+            card.className = 'app-card' + (featured ? ' featured' : '');
+
+            if (featured) {
+                var badge = document.createElement('div');
+                badge.className = 'featured-badge';
+                badge.textContent = '★ Favorite App';
+                card.appendChild(badge);
+            }
+
+            var icon = document.createElement('div');
+            icon.className = 'app-icon';
+            icon.textContent = app.icon;
+            card.appendChild(icon);
+
+            var info = document.createElement('div');
+            info.className = 'app-info';
+            info.innerHTML =
+                '<h3>' + app.title + '</h3>' +
+                '<p>' + app.desc + '</p>' +
+                '<a href="' + app.path + '" class="app-button">Open</a>';
+            card.appendChild(info);
+
+            card.appendChild(createFavToggle(app));
+            attachGlow(card);
+
+            return card;
+        }
+
+        function render() {
+            // ---- favorite spotlight, top and center ----
+            var favSection = document.getElementById('favoriteSection');
+            favSection.innerHTML = '';
+            var favId = getFavoriteId();
+            var favApp = null;
+            for (var i = 0; i < Apps.length; i++) {
+                if (Apps[i].id === favId) { favApp = Apps[i]; break; }
+            }
+            if (favApp) {
+                favSection.style.display = '';
+                favSection.appendChild(createCard(favApp, true));
+            } else {
+                favSection.style.display = 'none';
+            }
+
+            // ---- categorized grids ----
+            var container = document.getElementById('categoryContainer');
+            container.innerHTML = '';
+
+            var byCategory = {};
+            Apps.forEach(function (app) {
+                if (!byCategory[app.category]) byCategory[app.category] = [];
+                byCategory[app.category].push(app);
+            });
+
+            var orderedCategories = CATEGORY_ORDER.slice();
+            Object.keys(byCategory).forEach(function (cat) {
+                if (orderedCategories.indexOf(cat) === -1) orderedCategories.push(cat);
+            });
+
+            orderedCategories.forEach(function (cat) {
+                var apps = byCategory[cat];
+                if (!apps || !apps.length) return;
+
+                var section = document.createElement('section');
+                section.className = 'category-section';
+
+                var heading = document.createElement('h3');
+                heading.className = 'category-title';
+                heading.textContent = cat;
+                section.appendChild(heading);
+
+                var grid = document.createElement('div');
+                grid.className = 'app-grid';
+                apps.forEach(function (app) {
+                    grid.appendChild(createCard(app, false));
+                });
+                section.appendChild(grid);
+
+                container.appendChild(section);
+            });
+        }
+
+        render();
+    </script>
+
+</body>
+</html>
