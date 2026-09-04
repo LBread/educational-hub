@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Educational Application Hub</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        #brandBlock::before { content: none; }
+
+        .brand-icon-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+
+            width: 42px;
+            height: 42px;
+
+            font-size: 20px;
+            text-decoration: none;
+
+            background: linear-gradient(160deg, var(--orange-500), var(--orange-700));
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow:
+                inset 0 1px 1px rgba(255, 255, 255, 0.45),
+                var(--shadow-sm);
+        }
+    </style>
 </head>
 
 <body>
@@ -16,12 +39,15 @@
     </div>
 
     <header class="topbar">
-        <div>
+        <div class="app-brand" id="brandBlock">
+            <a href="apps/suggest.html" class="brand-icon-link" aria-label="Application Hub">&#127891;</a>
             <h1>Application Hub.</h1>
             <p class="subtitle">educational resources & tools by Ephraim Keate.</p>
         </div>
 
-        <a href="about.html" class="nav-button">About</a>
+        <nav class="nav-actions">
+            <a href="about.html" class="nav-button">About</a>
+        </nav>
     </header>
 
     <main>
@@ -46,7 +72,7 @@
         // Each app supplies its own icon, which is rendered automatically.
         const Apps = [
             {
-                id: 'ruler reading',
+                id: 'ruler-reading',
                 icon: '📏',
                 title: 'Ruler Reading Practice',
                 desc: 'Practice reading inch and metric rulers, one measurement at a time.',
@@ -54,17 +80,16 @@
                 category: 'Architecture'
             },
             {
-            
-                id: 'Binary Game',
-                icon: '💻',
-                title: 'Binary Practice',
-                desc: 'Practice converting binary number to values.',
+                id: 'binary-game',
+                icon: '🔢',
+                title: 'Binary Number Game',
+                desc: 'Convert decimal numbers to binary by toggling bits before the timer runs out.',
                 path: 'apps/app2/app2.html',
-                category: 'Coding'
+                category: 'Computer science'
             }
         ];
-//fix
-        const CATEGORY_ORDER = ['Math', 'Science', 'English', 'History', 'Geography', 'Coding', 'Study Tools', 'Reference', 'Other', 'Architecture', 'Music', 'Languages', 'Health', 'Social Studies', 'Economics', 'Philosophy', 'Psychology'];
+
+        const CATEGORY_ORDER = ['Math', 'Science', 'English', 'History', 'Geography', 'Computer science', 'Study Tools', 'Reference', 'Other', 'Architecture', 'Music', 'Languages', 'Health', 'Social Studies', 'Economics', 'Philosophy', 'Psychology'];
 
         // favorite application spotlight slot
         const FAVORITE_KEY = 'educationalHubFavoriteAppId';
