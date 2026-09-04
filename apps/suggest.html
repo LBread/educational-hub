@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Staff Tools | Educational Hub</title>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .gate-page { min-height: 100vh; }
+    .gate-main {
+      width: min(420px, 90%);
+      margin: 12vh auto 0;
+      text-align: center;
+    }
+    .gate-card {
+      padding: clamp(24px, 5vw, 36px);
+      background: var(--glass-light-bg-strong);
+      backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-light-border);
+      border-radius: 20px;
+      box-shadow: inset 0 1px 0 var(--glass-light-highlight), var(--glass-light-shadow);
+    }
+    .gate-card h2 { margin: 0 0 6px; color: var(--navy-900); font-size: 1.4rem; }
+    .gate-card p { margin: 0 0 20px; color: var(--text-dim); font-size: 14px; }
+    .gate-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--navy-900);
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .gate-input:focus { outline: none; border-color: var(--blue-500); }
+    .gate-actions { margin-top: 16px; }
+    .gate-error {
+      min-height: 20px;
+      margin: 12px 0 0;
+      color: #a93b19;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .gate-success { color: #18724a; font-size: 14px; font-weight: 600; margin: 0 0 16px; }
+  </style>
+</head>
+<body class="gate-page">
+  <main class="gate-main">
+    <section class="gate-card" id="card">
+      <div id="lockedView">
+        <h2>Staff Tools</h2>
+        <p>Enter the password given to you to open the app suggestion form.</p>
+        <input type="password" id="pwInput" class="gate-input" placeholder="Password" autocomplete="off">
+        <div class="gate-actions">
+          <button class="app-button" id="unlockButton" type="button">Unlock</button>
+        </div>
+        <p class="gate-error" id="gateError"></p>
+      </div>
+
+      <div id="unlockedView" style="display:none;">
+        <p class="gate-success">Unlocked.</p>
+        <h2>Suggest an App</h2>
+        <p>This opens a short Google Form — suggestions go straight to us, nothing is posted publicly.</p>
+        <div class="gate-actions">
+          <a class="app-button" id="formLink"
+             href="https://docs.google.com/forms/d/e/1FAIpQLSfPPyZYnPicn778eGBmvwOtqndSK60_oSDeH0JeuGXs4zua1w/viewform"
+             target="_blank" rel="noopener">Open the form</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      // SHA-256 hash of the shared password. The plaintext is never stored
+      // in this file — only this fixed-length fingerprint of it. A visitor
+      // reading this source sees the hash, not the password itself.
+      var PASSWORD_HASH = '817045173e23545ef8d72baf5800079a796b53da6b8a0a1e199c161253941a35';
+
+      var pwInput = document.getElementById('pwInput');
+      var unlockButton = document.getElementById('unlockButton');
+      var gateError = document.getElementById('gateError');
+      var lockedView = document.getElementById('lockedView');
+      var unlockedView = document.getElementById('unlockedView');
+
+      async function sha256Hex(text) {
+        var bytes = new TextEncoder().encode(text);
+        var digest = await crypto.subtle.digest('SHA-256', bytes);
+        return Array.from(new Uint8Array(digest))
+          .map(function (b) { return b.toString(16).padStart(2, '0'); })
+          .join('');
+      }
+
+      async function tryUnlock() {
+        var value = pwInput.value.trim();
+        if (!value) return;
+
+        unlockButton.disabled = true;
+        var hash = await sha256Hex(value);
+        unlockButton.disabled = false;
+
+        if (hash === PASSWORD_HASH) {
+          gateError.textContent = '';
+          lockedView.style.display = 'none';
+          unlockedView.style.display = 'block';
+        } else {
+          gateError.textContent = 'That password isn\'t right — try again.';
+          pwInput.value = '';
+          pwInput.focus();
+        }
+      }
+
+      unlockButton.addEventListener('click', tryUnlock);
+      pwInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') tryUnlock();
+      });
+    })();
+  </script>
+</body>
+</html>
