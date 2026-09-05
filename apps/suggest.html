@@ -61,7 +61,7 @@
       <div id="unlockedView" style="display:none;">
         <p class="gate-success">Unlocked.</p>
         <h2>Suggest an App</h2>
-        <p>This opens a short Google Form — suggestions go straight to us, nothing is posted publicly.</p>
+        <p>This opens a short Google Form suggestions go straight to me, nothing is posted publicly.</p>
         <div class="gate-actions">
           <a class="app-button" id="formLink"
              href="https://docs.google.com/forms/d/e/1FAIpQLSfPPyZYnPicn778eGBmvwOtqndSK60_oSDeH0JeuGXs4zua1w/viewform"
@@ -73,9 +73,6 @@
 
   <script>
     (function () {
-      // SHA-256 hash of the shared password. The plaintext is never stored
-      // in this file — only this fixed-length fingerprint of it. A visitor
-      // reading this source sees the hash, not the password itself.
       var PASSWORD_HASH = '817045173e23545ef8d72baf5800079a796b53da6b8a0a1e199c161253941a35';
 
       var pwInput = document.getElementById('pwInput');
@@ -105,7 +102,7 @@
           lockedView.style.display = 'none';
           unlockedView.style.display = 'block';
         } else {
-          gateError.textContent = 'That password isn\'t right — try again.';
+          gateError.textContent = 'That password isn\'t right contact me.';
           pwInput.value = '';
           pwInput.focus();
         }
