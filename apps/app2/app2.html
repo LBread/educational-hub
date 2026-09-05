@@ -201,6 +201,7 @@
 
   <script>
     (function () {
+
       var LEVELS = [
         { bits: 4, time: 20 },
         { bits: 5, time: 18 },
@@ -208,7 +209,7 @@
         { bits: 7, time: 14 },
         { bits: 8, time: 12 }
       ];
-      var LEVEL_UP_DELAY = 1600;  // pause (ms) shown after leveling up, before the next question starts
+      var LEVEL_UP_DELAY = 1600; 
       var CORRECT_PER_LEVEL = 3;
       var START_LIVES = 3;
       var BEST_KEY = 'binaryGameHighScore';
@@ -309,9 +310,6 @@
         buttons.forEach(function (b) { b.disabled = !enabled; });
         clearButton.disabled = !enabled;
       }
-
-      // A small hand-built heart icon (no emoji font dependency), drawn from
-      // two circles and a rotated square, filled for a life remaining and
       // outlined for a life lost.
       function heartIcon(filled) {
         var fill = filled ? 'var(--orange-600)' : 'none';
@@ -510,5 +508,6 @@
       renderStatus();
     })();
   </script>
+  <script data-goatcounter="https://ephskeate.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
